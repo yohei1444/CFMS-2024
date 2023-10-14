@@ -1,6 +1,13 @@
-import requests
-import json
-import datetime
+import time
+
+try:
+    import requests
+    import datetime
+
+except Exception as e:
+
+    print(e)
+    time.sleep(10)
 
 
 class PostApi:

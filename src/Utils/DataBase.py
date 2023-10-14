@@ -1,31 +1,41 @@
-import sqlite3
+import time
+try:
+    import sqlite3
+    from BaseByteConverter import BaseByteConverter as Bb
+except Exception as e:
 
-class DataBase:
+    print(e)
+    time.sleep(10)
+
+class DataBase(Bb):
 
     def __init__(self) -> None:
+        super().__init__()
+
         self.conn = sqlite3.connect('CFMS2024.db')
         self.cursor = self.conn.cursor()
     
     def addShopLoginHistory(self, shopId, shopName, password):
+        respones = None
 
         if self.hasTable("ShopLoginHistory"):
             try:
+                respones = "insert"
                 self.cursor.execute(f'''
                 INSERT INTO ShopLoginHistory (ShopId, ShopName, Password) VALUES (?,?,?)
-                ''',(shopId,shopName,password))
+                ''',(shopId,shopName,self.encodeToBase64(password)))
             
             except sqlite3.IntegrityError:
+                respones = "update"
                 self.cursor.execute("""
                     UPDATE ShopLoginHistory
-                    SET LoginDate = datetime('now', 'localtime')
+                    SET LoginDate = datetime('now', 'localtime'), ShopName = ?, Password = ?
                     WHERE ShopId = ?
-                """, (shopId,))
-            
-            finally:
-                # 変更をコミット
-                self.conn.commit()
+                """, (shopName, self.encodeToBase64(password),shopId,))
+
 
         else:
+            respones = "create"
             # テーブルを作成
             self.cursor.execute('''
             CREATE TABLE ShopLoginHistory (
@@ -36,20 +46,26 @@ class DataBase:
             )
             ''')
 
-            self.cursor.execute(f'''
+            self.cursor.execute('''
             INSERT INTO ShopLoginHistory (ShopId, ShopName, Password) VALUES (?,?,?)
-            ''',(shopId,shopName,password))
+            ''',(shopId,shopName,self.encodeToBase64(password)))
             
-            # 変更をコミット
-            self.conn.commit()
+        # 変更をコミット
+        self.conn.commit()
+        return respones
 
     def getShopLoginHistory(self):
         self.cursor.execute("SELECT * FROM ShopLoginHistory")
-
+        
         # 結果を取得して表示
+        return self.cursor.fetchall()
+    
+    def getLocalShopPassword(self,shopId):
+
+        self.cursor.execute('''SELECT Password FROM ShopLoginHistory WHERE ShopId =?''',(shopId,))
         rows = self.cursor.fetchall()
-        for row in rows:
-            print(row)
+        # 結果を取得して表示
+        return rows[0][0]
 
 
     def hasTable(self,tableName):
@@ -69,8 +85,7 @@ class DataBase:
 if __name__ == "__main__":
 
     a = DataBase()
-    a.addShopLoginHistory("Seiken2023","生活研究部","$2b$12$vx9ZCSXZhkzNExjoFPq5je1U.nsT/JiUj7mdmH..R.Ttl.pC1kwka")
-    a.getShopLoginHistory()
+    print(a.getLocalShopPassword("Admin's Shop"))
 
 
 
