@@ -68,6 +68,13 @@ class Authentication(Bb):
                 "displayName": self.displayName
                 }
     
+    def getPCInformation(self):
+
+        return {"IPAddress":self.ipAddress, 
+                "UserMacAddress":self.macAddress
+                }
+    
+    
     def setDisplayName(self, displayName ):
 
         self.displayName = displayName
@@ -115,15 +122,15 @@ class Authentication(Bb):
     #ファイルコピー防止のため、クラウドのパスワードにMACアドレスを足したローカルのパスワードを作成
     def createLocalPasswordHash(self):
 
-        word = self.encodeToBase64(self.password) + self.macAddress
+        word = self.macAddress + self.encodeToBase64(self.password)
 
         return  bcrypt.hashpw(word.encode("utf8"), bcrypt.gensalt())
     
-    #ファイルコピー防止のため、クラウドのパスワードにMACアドレスを足したローカルのパスワードを作成
     def localShopLogin(self, localPass, cludpass):
         
         basePass = self.decodeFromBase64(localPass)
-        password = cludpass + self.macAddress
+        password = self.macAddress + cludpass
+        print(password)
 
         if bcrypt.checkpw(password.encode("utf8"), basePass):
             self.password = self.decodeFromBase64(cludpass)
@@ -136,9 +143,12 @@ class Authentication(Bb):
 
 if __name__ == "__main__":
     from RealtimeDataBase import RealtimeDataBase
+    from DataBase import DataBase
     
     r = RealtimeDataBase()
     a = Authentication()
+    d = DataBase()    
 
-    print(a.shopLogin(r.getShopPassWord()))
-    print(a.getUserData())
+    r.setShopId("Admin's Shop")
+    print(d.getLocalShopPassword(r.getShopId()))
+    print(a.localShopLogin(d.getLocalShopPassword(r.getShopId()),r.getShopPassWord()))
