@@ -1,0 +1,7 @@
+E1xx ネットワーク系エラー
+
+E10x デバイスのネットワークエラー
+
+E11x Google APIエラー
+
+E12X Firebase エラー
