@@ -1,6 +1,6 @@
 import tkinter as tk
 
-class ErrorTmplate:
+class ErrorTmplateView:
 
     def __init__(self, root, errorCode, errorMessage, reStartFunc) -> None:
         
@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
     root["bg"] = "#ffffff"
 
-    error = ErrorTmplate(root,"E101","インターネットに接続できません",None)
+    error = ErrorTmplateView(root,"E101","インターネットに接続できません",None)
     error.createErrorText(["tmp1"],[])
     error.createWidget()
 
