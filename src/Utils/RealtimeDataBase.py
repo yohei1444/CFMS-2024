@@ -16,7 +16,7 @@ except Exception as e:
 class RealtimeDataBase(Bb):
 
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__() 
 
         # サービスアカウントキーの内容を辞書として直接記述
         self.api = PostApi()
